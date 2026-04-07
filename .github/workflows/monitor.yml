@@ -1,0 +1,18 @@
+name: サジー新商品モニター
+
+on:
+  schedule:
+    # 毎朝9時（日本時間）に自動実行 = UTC 0時
+    - cron: "0 0 * * *"
+  workflow_dispatch: # 手動実行も可能
+
+jobs:
+  monitor:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: リポジトリをチェックアウト
+        uses: actions/checkout@v4
+
+      - name: Python セットアップ
+        uses: act
