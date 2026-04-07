@@ -1,0 +1,43 @@
+name: サジー新商品モニター
+
+on:
+  schedule:
+    # 毎朝9時（日本時間）に自動実行 = UTC 0時
+    - cron: "0 0 * * *"
+  workflow_dispatch: # 手動実行も可能
+
+jobs:
+  monitor:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: リポジトリをチェックアウト
+        uses: actions/checkout@v4
+
+      - name: Python セットアップ
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: 依存パッケージをインストール
+        run: pip install requests beautifulsoup4
+
+      - name: 前回の状態ファイルを復元
+        uses: actions/cache@v4
+        with:
+          path: state.json
+          key: saji-state-${{ github.run_id }}
+          restore-keys: |
+            saji-state-
+
+      - name: モニタースクリプト実行
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+        run: python monitor.py
+
+      - name: 状態ファイルを保存
+        uses: actions/cache/save@v4
+        if: always()
+        with:
+          path: state.json
+          key: saji-state-${{ github.run_id }}
